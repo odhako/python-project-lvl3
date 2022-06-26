@@ -1,0 +1,7 @@
+.venv/
+__pycache__
+dist/
+.idea/
+.DS_Store
+.coverage
+.pytest_cache
