@@ -11,7 +11,7 @@ package-install:
 	python3 -m pip install --user dist/*.whl
 
 lint:
-	poetry run flake8 gendiff
+	poetry run flake8 page_loader
 
 test:
 	poetry install
@@ -20,7 +20,7 @@ test:
 	python3 -m pip install dist/*.whl
 
 test-coverage:
-	poetry run pytest --cov=gendiff
+	poetry run pytest --cov=page_loader
 
 pytest:
 	poetry run pytest
