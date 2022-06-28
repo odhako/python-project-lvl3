@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Test, publish coverage and lint with flake8
 
 # Controls when the workflow will run
 on:
@@ -30,15 +30,19 @@ jobs:
           
       - name: Set up dependencies
         run: |
+          python3 -m pip install --upgrade pip
           pip install poetry
           poetry install
           
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Test with pytest
+        run: poetry run pytest
+        
+      - name: Test & publish code coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: poetry run pytest --cov=page_loader --cov-report xml
+          
+      - name: Lint with flake8
+        run: poetry run flake8 page_loader
