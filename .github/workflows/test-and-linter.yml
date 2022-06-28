@@ -30,7 +30,6 @@ jobs:
           
       - name: Set up dependencies
         run: |
-          python3 -m pip install --upgrage pip
           pip install poetry
           poetry install
           
