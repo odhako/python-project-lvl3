@@ -1,4 +1,4 @@
-name: Test, publish coverage and lint with flake8
+name: Tests & flake8
 
 on:
   push:
