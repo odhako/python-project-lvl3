@@ -26,7 +26,13 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4.0.0
         with:
-          python-version: 3.10
+          python-version: "3.10"
+          
+      - name: Set up dependencies
+        run: |
+          python3 -m pip install --upgrage pip
+          pip install poetry
+          poetry install
           
       # Runs a single command using the runners shell
       - name: Run a one-line script
