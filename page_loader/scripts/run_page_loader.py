@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import argparse
+from os import getcwd
+from page_loader.loader import download
 
 
 def main():
@@ -9,12 +11,14 @@ def main():
     parser.add_argument('--output',
                         help="Output directory, must be created before. "
                              "Default is working directory.",
-                        default='default')
+                        default=getcwd())
     parser.add_argument('url',
                         help='Url address with scheme, like http://')
     args = parser.parse_args()
-    print(args)
+    download(args.output, args.url)
 
 
 if __name__ == "__main__":
     main()
+
+# https://page-loader.hexlet.repl.co/
