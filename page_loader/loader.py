@@ -7,7 +7,7 @@ import os
 def download(directory, url):
     r = requests.get(url)
     filename = re.sub(r'\W', '-',
-                      re.sub(r'(^https?://)|(/$)|\.[^/]+$', '', url)
+                      re.sub(r'(^https?://)|(/$)|html|htm', '', url)
                       ) + '.html'
     file = os.path.join(directory, filename)
 
