@@ -40,6 +40,14 @@ python-versions = ">=3.5.0"
 unicode_backport = ["unicodedata2"]
 
 [[package]]
+name = "cli-test-helpers"
+version = "3.1.0"
+description = "Useful helpers for writing tests for your Python CLI program."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "colorama"
 version = "0.4.5"
 description = "Cross-platform colored terminal text."
@@ -258,7 +266,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "1b3484dd2880a525cbd4908248e4281349adf5984876176674d156537ef7852d"
+content-hash = "56434dd99700092ef125df16eb73c6f0d1fa5936be20bf86c90adf7d9ce65c56"
 
 [metadata.files]
 atomicwrites = [
@@ -276,6 +284,10 @@ certifi = [
 charset-normalizer = [
     {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
     {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
+]
+cli-test-helpers = [
+    {file = "cli-test-helpers-3.1.0.tar.gz", hash = "sha256:9eb7b714cb8049799575dae2fa7da4250efd6b73e23eeb94438554eec4033cff"},
+    {file = "cli_test_helpers-3.1.0-py3-none-any.whl", hash = "sha256:26be2d55095a432a41a437e7209fc238ef00f02a3b2c307ac3e56bb61f7a3473"},
 ]
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
