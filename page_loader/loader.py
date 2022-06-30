@@ -13,5 +13,4 @@ def download(directory, url):
 
     with open(file, mode='w') as html_file:
         html_file.write(r.text)
-    print(os.path.join(directory, filename))
     return os.path.join(directory, filename)

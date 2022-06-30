@@ -15,7 +15,7 @@ def main():
     parser.add_argument('url',
                         help='Url address with scheme, like http://')
     args = parser.parse_args()
-    download(args.output, args.url)
+    print(download(args.output, args.url))
 
 
 if __name__ == "__main__":
