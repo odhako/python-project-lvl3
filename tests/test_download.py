@@ -1,3 +1,4 @@
+import os.path
 import tempfile
 import requests
 import requests_mock
@@ -10,9 +11,27 @@ def test_mock():
         assert requests.get('http://test.com').text == 'resp'
 
 
-def test_download():
+def test_download_html_only():
     with tempfile.TemporaryDirectory() as tempdir:
         with requests_mock.Mocker() as m:
-            m.get('http://test.com', text='resp')
+            m.get('http://test.com', text='<!DOCTYPE html>\n')
             with open(download(tempdir, 'http://test.com'), 'r') as result:
-                assert result.read() == 'resp'
+                assert result.read() == '<!DOCTYPE html>\n'
+
+
+def test_download_html_and_picture():
+    with tempfile.TemporaryDirectory() as tempdir:
+        with open('tests/fixtures/webpage.html') as webpage:
+            with requests_mock.Mocker() as m:
+                m.get('http://test.com', text=webpage.read())
+                m.get('http://test.com/assets/nodejs.png',
+                      text='picture')
+                with open(download(tempdir, 'http://test.com'), 'r') as result:
+                    with open('tests/fixtures/webpage_result.html') as expected:
+                        assert result.read() == expected.read()
+                        assert os.path.exists(
+                            os.path.join(
+                                tempdir,
+                                'test-com_files/test-com-assets-nodejs.png'
+                            )
+                        )
