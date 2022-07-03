@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 
 
 def download(directory, url):
-
     # Names
     directory = os.path.abspath(directory)
     file_name = re.sub(r'\W', '-',
@@ -46,7 +45,8 @@ def download(directory, url):
             image['src'] = os.path.join(content_folder_name, image_name)
 
             # Create image file
-            with open(os.path.join(content_folder, image_name), 'xb') as image_file:
+            with open(os.path.join(content_folder, image_name), 'xb') \
+                    as image_file:
                 image_file.write(image_binary)
 
     # Create HTML file
