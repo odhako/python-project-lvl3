@@ -13,3 +13,6 @@ This is **page-loader**. Program can download a web page to disc.
 
 #### Step 2:
 - `page-loader --output OUTPUT url` - web page with picture - [asciinema](https://asciinema.org/a/505626)
+
+#### Step 3:
+- `page-loader url` - web page with local resources (saved in working directory) - [asciinema](https://asciinema.org/a/506277)
