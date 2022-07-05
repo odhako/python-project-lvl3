@@ -26,12 +26,18 @@ def test_download_html_and_picture():
                 m.get('http://test.com', text=webpage.read())
                 m.get('http://test.com/assets/nodejs.png',
                       text='picture')
+                m.get('http://test.com/assets/application.css',
+                      text='css_table')
+                m.get('http://test.com/courses',
+                      text='html_link')
+                m.get('http://test.com/packs/js/runtime.js',
+                      text='js_script')
                 with open(download(tempdir, 'http://test.com'), 'r') as result:
+                    assert os.path.exists(
+                        os.path.join(
+                            tempdir,
+                            'test-com_files/test-com-assets-nodejs.png'
+                        )
+                    )
                     with open('tests/fixtures/webpage_result.html') as expected:
                         assert result.read() == expected.read()
-                        assert os.path.exists(
-                            os.path.join(
-                                tempdir,
-                                'test-com_files/test-com-assets-nodejs.png'
-                            )
-                        )
