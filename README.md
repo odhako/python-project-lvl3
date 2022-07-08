@@ -16,3 +16,6 @@ This is **page-loader**. Program can download a web page to disc.
 
 #### Step 3:
 - `page-loader url` - web page with local resources (saved in working directory) - [asciinema](https://asciinema.org/a/506277)
+
+#### Step 4:
+- Logging demo - [asciinema](https://asciinema.org/a/507149)
