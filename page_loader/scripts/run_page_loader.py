@@ -8,7 +8,7 @@ import logging
 def main():
     logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s %(levelname)s: %(message)s',
-                        datefmt = '%Y-%m-%d GMT%z %H:%M:%S',
+                        datefmt='%Y-%m-%d GMT%z %H:%M:%S',
                         handlers=[
                             logging.FileHandler('page-loader.log'),
                             logging.StreamHandler()

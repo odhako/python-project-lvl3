@@ -1,7 +1,5 @@
 import re
-import socket
 import sys
-
 import requests
 import os
 from urllib.parse import urljoin
@@ -39,7 +37,7 @@ def get_url(resource):
     return resource['src'] if resource.has_attr('src') else resource['href']
 
 
-def download(directory, url):
+def download(directory, url):  # noqa: C901
     # Names
     directory = os.path.abspath(directory)
     html_file_name = re.sub(r'\W', '-',
