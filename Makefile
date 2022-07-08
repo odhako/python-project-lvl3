@@ -5,7 +5,8 @@ build:
 	poetry build
 
 package-install:
-	python3 -m pip install --user dist/*.whl --force-reinstall
+	python3 -m pip uninstall hexlet-code -y
+	python3 -m pip install --user dist/*.whl
 
 lint:
 	poetry run flake8 page_loader
@@ -13,7 +14,8 @@ lint:
 test:
 	poetry install
 	poetry build
-	python3 -m pip install dist/*.whl --force-reinstall
+	pip3 uninstall hexlet-code -y
+	python3 -m pip install dist/*.whl
 
 test-coverage:
 	poetry run pytest --cov=page_loader
