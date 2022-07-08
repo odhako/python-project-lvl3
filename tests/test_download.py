@@ -1,5 +1,6 @@
 import os.path
 import tempfile
+import pytest
 import requests
 import requests_mock
 from page_loader import download
@@ -41,3 +42,19 @@ def test_download_html_and_picture():
                     )
                     with open('tests/fixtures/webpage_result.html') as expected:
                         assert result.read() == expected.read()
+
+
+def test_error_no_scheme(caplog):
+    with tempfile.TemporaryDirectory() as tempdir:
+        with pytest.raises(SystemExit):
+            download(tempdir, 'www.test.com')
+        assert 'No scheme supplied' in caplog.text
+
+
+def test_error_invalid_directory(caplog):
+    with tempfile.TemporaryDirectory() as tempdir:
+        with pytest.raises(SystemExit):
+            with requests_mock.Mocker() as m:
+                m.get('http://test.com', text='<!DOCTYPE html>\n')
+                download(os.path.join(tempdir, 'test'), 'http://test.com')
+        assert 'does not exist!' in caplog.text
