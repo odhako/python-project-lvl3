@@ -1,9 +1,13 @@
 import re
+import socket
+import sys
+
 import requests
 import os
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.formatter import HTMLFormatter
+import logging
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -45,16 +49,31 @@ def download(directory, url):
     html_file = os.path.join(directory, html_file_name)
     content_folder = os.path.join(directory, content_folder_name)
 
-    # Create a folder here
-    os.mkdir(content_folder)
-
-    html_text = requests.get(url).text
+    # Getting web page
+    try:
+        html_text = requests.get(url).text
+    except requests.exceptions.MissingSchema:
+        logging.error('No scheme supplied. Add http:// or https://')
+        sys.exit()
+    except requests.exceptions.ConnectionError:
+        logging.error('Url not found or no internet connection.')
+        sys.exit()
     parsed_html = BeautifulSoup(html_text, 'html.parser')
+
+    # Create a folder here
+    try:
+        os.mkdir(content_folder)
+    except FileNotFoundError:
+        logging.error(f'Directory "{directory}" does not exist!')
+        sys.exit()
+    logging.info('Content folder created.')
 
     # Search for all tags and process
     for resource in parsed_html.find_all(True):
 
         if is_local_resource(resource, url):
+            logging.info('Found local resource.')
+
             # Download resource file to RAM
             file_binary = requests.get(urljoin(url, get_url(resource))).content
 
@@ -80,8 +99,16 @@ def download(directory, url):
             with open(os.path.join(content_folder, file_name), 'xb') \
                     as image_file:
                 image_file.write(file_binary)
+            logging.info('Local resource loaded.')
 
     # Create HTML file
     with open(html_file, mode='w') as h:
         h.write(parsed_html.prettify(formatter=UnsortedAttributes()))
+    logging.info('HTML file created.')
+
+    # Delete folder if empty
+    if len(os.listdir(content_folder)) == 0:
+        os.rmdir(content_folder)
+        logging.info('Content folder is empty. Deleting.')
+
     return os.path.join(directory, html_file_name)
