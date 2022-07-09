@@ -1,17 +1,33 @@
 #!/usr/bin/env python
 import argparse
+import sys
 from os import getcwd
+import requests.exceptions
+
 from page_loader.loader import download
 import logging
 
 
-def main():
-    logging.basicConfig(level=logging.ERROR,
+def main():  # noqa: C901
+
+    file_handler = logging.FileHandler('page-loader.log')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        fmt='%(asctime)s %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d GMT%z %H:%M:%S'))
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.ERROR)
+    stream_handler.setFormatter(logging.Formatter(
+        fmt='%(levelname)s: %(message)s'
+    ))
+
+    logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s: %(message)s',
                         datefmt='%Y-%m-%d GMT%z %H:%M:%S',
                         handlers=[
-                            logging.FileHandler('page-loader.log'),
-                            logging.StreamHandler()
+                            file_handler,
+                            stream_handler
                         ]
                         )
     logging.info('Script started.')
@@ -26,7 +42,23 @@ def main():
     parser.add_argument('url',
                         help='Url address with scheme, like http://')
     args = parser.parse_args()
-    print(download(args.output, args.url))
+    try:
+        print(download(args.output, args.url))
+    except FileNotFoundError:
+        logging.error(f'Directory "{args.output}" does not exist!')
+        sys.exit()
+    except PermissionError:
+        logging.error(f'Permission denied: {args.output}')
+        sys.exit()
+    except requests.exceptions.MissingSchema:
+        logging.error('The URL scheme (e.g. http or https) is missing.')
+        sys.exit()
+    except requests.exceptions.ConnectionError:
+        logging.error('A Connection error occurred.')
+        sys.exit()
+    except requests.exceptions.InvalidURL:
+        logging.error('The URL provided was somehow invalid.')
+        sys.exit()
     logging.info('Script has finished working.')
 
 

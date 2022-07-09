@@ -1,5 +1,5 @@
 import re
-import sys
+# import sys
 import requests
 import os
 from urllib.parse import urljoin
@@ -37,7 +37,7 @@ def get_url(resource):
     return resource['src'] if resource.has_attr('src') else resource['href']
 
 
-def download(directory, url):  # noqa: C901
+def download(directory, url):
     # Names
     directory = os.path.abspath(directory)
     html_file_name = re.sub(r'\W', '-',
@@ -48,22 +48,26 @@ def download(directory, url):  # noqa: C901
     content_folder = os.path.join(directory, content_folder_name)
 
     # Getting web page
-    try:
-        html_text = requests.get(url).text
-    except requests.exceptions.MissingSchema:
-        logging.error('No scheme supplied. Add http:// or https://')
-        sys.exit()
-    except requests.exceptions.ConnectionError:
-        logging.error('Url not found or no internet connection.')
-        sys.exit()
+    html_text = requests.get(url).text
+    # except requests.exceptions.MissingSchema:
+    #     logging.error('The URL scheme (e.g. http or https) is missing.')
+    #     sys.exit()
+    # except requests.exceptions.ConnectionError:
+    #     logging.error('A Connection error occurred.')
+    #     sys.exit()
+    # except requests.exceptions.InvalidURL:
+    #     logging.error('The URL provided was somehow invalid.')
+    #     sys.exit()
     parsed_html = BeautifulSoup(html_text, 'html.parser')
 
     # Create a folder here
-    try:
-        os.mkdir(content_folder)
-    except FileNotFoundError:
-        logging.error(f'Directory "{directory}" does not exist!')
-        sys.exit()
+    os.mkdir(content_folder)
+    # except FileNotFoundError:
+    #     logging.error(f'Directory "{directory}" does not exist!')
+    #     sys.exit()
+    # except PermissionError:
+    #     logging.error(f'Permission denied: {directory}')
+    #     sys.exit()
     logging.info('Content folder created.')
 
     # Search for all tags and process
