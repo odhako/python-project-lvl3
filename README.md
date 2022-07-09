@@ -19,3 +19,6 @@ This is **page-loader**. Program can download a web page to disc.
 
 #### Step 4:
 - Logging demo - [asciinema](https://asciinema.org/a/507149)
+
+#### Step 5:
+- Errors demo - [asciinema](https://asciinema.org/a/507369)
