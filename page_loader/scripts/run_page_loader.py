@@ -31,7 +31,7 @@ def main():  # noqa: C901
                         ]
                         )
 
-    logging.debug('Start.')
+    logging.debug('Script started.')
 
     parser = argparse.ArgumentParser(
         description="Downloads a web page."
@@ -49,6 +49,7 @@ def main():  # noqa: C901
 
     try:
         print(f'Page was downloaded as "{download(args.url, args.output)}"')
+
     except FileNotFoundError:
         logging.error(f'Directory "{args.output}" does not exist!')
         sys.exit()
@@ -63,6 +64,9 @@ def main():  # noqa: C901
         sys.exit()
     except requests.exceptions.InvalidURL:
         logging.error('The URL provided was somehow invalid.')
+        sys.exit()
+    except requests.exceptions.HTTPError as e:
+        logging.error(e)
         sys.exit()
 
     logging.debug('Finish.')

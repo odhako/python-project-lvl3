@@ -48,7 +48,11 @@ def download(url, directory):
     content_folder = os.path.join(directory, content_folder_name)
 
     # Getting web page
-    html_text = requests.get(url).text
+    get = requests.get(url)
+    if get.status_code != 200:
+        raise requests.exceptions.HTTPError(
+            f'HTTP status code {get.status_code}')
+    html_text = get.text
     parsed_html = BeautifulSoup(html_text, 'html.parser')
 
     # Create a folder here
