@@ -37,7 +37,7 @@ def get_url(resource):
     return resource['src'] if resource.has_attr('src') else resource['href']
 
 
-def download(directory, url):
+def download(url, directory):
     # Names
     directory = os.path.abspath(directory)
     html_file_name = re.sub(r'\W', '-',

@@ -48,7 +48,7 @@ def main():  # noqa: C901
     logging.info(f'Output path: {args.output}')
 
     try:
-        print(f'Page was downloaded as "{download(args.output, args.url)}"')
+        print(f'Page was downloaded as "{download(args.url, args.output)}"')
     except FileNotFoundError:
         logging.error(f'Directory "{args.output}" does not exist!')
         sys.exit()

@@ -16,7 +16,7 @@ def test_download_html_only():
     with tempfile.TemporaryDirectory() as tempdir:
         with requests_mock.Mocker() as m:
             m.get('http://test.com', text='<!DOCTYPE html>\n')
-            with open(download(tempdir, 'http://test.com'), 'r') as result:
+            with open(download('http://test.com', tempdir), 'r') as result:
                 assert result.read() == '<!DOCTYPE html>\n'
 
 
@@ -33,7 +33,7 @@ def test_download_html_and_picture():
                       text='html_link')
                 m.get('http://test.com/packs/js/runtime.js',
                       text='js_script')
-                with open(download(tempdir, 'http://test.com'), 'r') as result:
+                with open(download('http://test.com', tempdir), 'r') as result:
                     assert os.path.exists(
                         os.path.join(
                             tempdir,
@@ -47,7 +47,7 @@ def test_download_html_and_picture():
 def test_error_no_scheme(caplog):
     with tempfile.TemporaryDirectory() as tempdir:
         with pytest.raises(requests.exceptions.MissingSchema):
-            download(tempdir, 'www.test.com')
+            download('www.test.com', tempdir)
         # assert 'No scheme supplied' in caplog.text
 
 
@@ -56,5 +56,5 @@ def test_error_invalid_directory(caplog):
         with pytest.raises(FileNotFoundError):
             with requests_mock.Mocker() as m:
                 m.get('http://test.com', text='<!DOCTYPE html>\n')
-                download(os.path.join(tempdir, 'test'), 'http://test.com')
+                download('http://test.com', os.path.join(tempdir, 'test'))
         # assert 'does not exist!' in caplog.text
