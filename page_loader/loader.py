@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.formatter import HTMLFormatter
 import logging
+from progress.bar import IncrementalBar
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -54,14 +55,23 @@ def download(directory, url):
     os.mkdir(content_folder)
     logging.debug('Content folder created.')
 
-    # Search for all tags and process
-    for resource in parsed_html.find_all(True):
+    # Create progress bar
+    bar = IncrementalBar('Downloading:',
+                         suffix='%(percent)d%% - %(eta)d seconds remaining',
+                         max=len(parsed_html.find_all(
+                             lambda x: is_local_resource(x, url)
+                         )))
 
-        if is_local_resource(resource, url):
+    # Search for all tags and process
+    with bar:
+        for resource in parsed_html.find_all(
+                lambda x: is_local_resource(x, url)):
+
             logging.debug('Found local resource.')
 
             # Download resource file to RAM
-            file_binary = requests.get(urljoin(url, get_url(resource))).content
+            file_binary = requests.get(
+                urljoin(url, get_url(resource))).content
 
             # Resource file name
             file_name, file_extension = os.path.splitext(get_url(resource))
@@ -82,15 +92,15 @@ def download(directory, url):
                 resource['href'] = os.path.join(content_folder_name, file_name)
 
             # Create resource file
-            with open(os.path.join(content_folder, file_name), 'xb') \
-                    as image_file:
-                image_file.write(file_binary)
+            with open(os.path.join(content_folder, file_name), 'xb') as f:
+                f.write(file_binary)
             logging.debug('Local resource loaded.')
+            bar.next()
 
     # Create HTML file
     with open(html_file, mode='w') as h:
         h.write(parsed_html.prettify(formatter=UnsortedAttributes()))
-    logging.info('HTML file created.')
+    logging.debug('HTML file created.')
 
     # Delete folder if empty
     if len(os.listdir(content_folder)) == 0:
