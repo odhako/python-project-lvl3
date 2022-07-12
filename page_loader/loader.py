@@ -105,7 +105,8 @@ def download(url, directory):
 
     # Create HTML file
     with open(html_file, mode='w') as h:
-        h.write(parsed_html.prettify(formatter=UnsortedAttributes()))
+        # h.write(parsed_html.prettify(formatter=UnsortedAttributes()))
+        h.write(parsed_html.prettify())
     logging.debug('HTML file created.')
 
     # Delete folder if empty
