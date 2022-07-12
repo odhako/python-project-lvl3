@@ -1,7 +1,7 @@
 import re
 import requests
 import os
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from bs4.formatter import HTMLFormatter
 import logging
@@ -22,7 +22,9 @@ def is_local_resource(tag, url):
             link = tag['src']
         else:
             return False
-        if link.startswith(url):
+        # if link.startswith(url):
+        #     return True
+        if urlparse(link).hostname == urlparse(url).hostname:
             return True
         else:
             if link.startswith('http'):
