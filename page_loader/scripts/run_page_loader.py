@@ -52,22 +52,22 @@ def main():  # noqa: C901
 
     except FileNotFoundError:
         logging.error(f'Directory "{args.output}" does not exist!')
-        sys.exit()
+        sys.exit(2)
     except PermissionError:
         logging.error(f'Permission denied: {args.output}')
-        sys.exit()
+        sys.exit(2)
     except requests.exceptions.MissingSchema:
         logging.error('The URL scheme (e.g. http or https) is missing.')
-        sys.exit()
+        sys.exit(2)
     except requests.exceptions.ConnectionError:
         logging.error('A Connection error occurred.')
-        sys.exit()
+        sys.exit(1)
     except requests.exceptions.InvalidURL:
         logging.error('The URL provided was somehow invalid.')
-        sys.exit()
+        sys.exit(2)
     except requests.exceptions.HTTPError as e:
         logging.error(e)
-        sys.exit()
+        sys.exit(1)
 
     logging.debug('Finish.')
 
