@@ -8,3 +8,4 @@ dist/
 /downloads/
 *.log
 poetry.lock
+/tests/webpages_test/
