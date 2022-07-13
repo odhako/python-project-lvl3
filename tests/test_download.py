@@ -20,7 +20,7 @@ def test_download_html_only():
                 assert result.read() == '<!DOCTYPE html>\n'
 
 
-def test_download_html_and_picture():
+def test_download_html_and_sources():
     with tempfile.TemporaryDirectory() as tempdir:
         with open('tests/fixtures/webpage.html') as webpage:
             with requests_mock.Mocker() as m:
