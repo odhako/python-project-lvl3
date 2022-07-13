@@ -3,15 +3,8 @@ import requests
 import os
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
-from bs4.formatter import HTMLFormatter
 import logging
 from progress.bar import IncrementalBar
-
-
-class UnsortedAttributes(HTMLFormatter):
-    def attributes(self, tag):
-        for k, v in tag.attrs.items():
-            yield k, v
 
 
 def is_local_resource(tag, url):
@@ -22,8 +15,6 @@ def is_local_resource(tag, url):
             link = tag['src']
         else:
             return False
-        # if link.startswith(url):
-        #     return True
         if urlparse(link).hostname == urlparse(url).hostname:
             return True
         else:
@@ -105,7 +96,6 @@ def download(url, directory):
 
     # Create HTML file
     with open(html_file, mode='w') as h:
-        # h.write(parsed_html.prettify(formatter=UnsortedAttributes()))
         h.write(parsed_html.prettify())
     logging.debug('HTML file created.')
 
