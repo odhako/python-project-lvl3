@@ -1,6 +1,7 @@
 import re
 import requests
 import os
+import sys
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 import logging
@@ -41,15 +42,34 @@ def download(url, directory):
     content_folder = os.path.join(directory, content_folder_name)
 
     # Getting web page
-    get = requests.get(url)
+    try:
+        get = requests.get(url)
+    except requests.exceptions.MissingSchema:
+        raise requests.exceptions.MissingSchema(
+            'The URL scheme (e.g. http or https) is missing.'
+        )
+    except requests.exceptions.ConnectionError:
+        raise requests.exceptions.ConnectionError(
+            'A Connection error occurred.'
+        )
+    except requests.exceptions.InvalidURL:
+        raise requests.exceptions.InvalidURL(
+            'The URL provided was somehow invalid.'
+        )
     if get.status_code != 200:
         raise requests.exceptions.HTTPError(
-            f'HTTP status code {get.status_code}')
+            f'HTTP status code {get.status_code}'
+        )
     html_text = get.text
     parsed_html = BeautifulSoup(html_text, 'html.parser')
 
     # Create a folder here
-    os.mkdir(content_folder)
+    try:
+        os.mkdir(content_folder)
+    except FileNotFoundError:
+        raise FileNotFoundError(f'Directory "{directory}" does not exist!')
+    except PermissionError:
+        raise PermissionError(f'Permission denied: {directory}')
     logging.debug('Content folder created.')
 
     # Create progress bar

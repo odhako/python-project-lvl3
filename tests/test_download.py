@@ -47,7 +47,7 @@ def test_download_html_and_sources():
 def test_error_no_scheme():
     with tempfile.TemporaryDirectory() as tempdir:
         with pytest.raises(requests.exceptions.MissingSchema,
-                           match="Invalid URL"):
+                           match="scheme .* is missing"):
             download('www.test.com', tempdir)
 
 
