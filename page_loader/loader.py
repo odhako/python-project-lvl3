@@ -1,47 +1,33 @@
 import re
 import requests
 import os
-import sys
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 import logging
 from progress.bar import IncrementalBar
 
 
-def is_local_resource(tag, url):
-    if tag.name in ('img', 'link', 'script'):
-        if tag.has_attr('href'):
-            link = tag['href']
-        elif tag.has_attr('src'):
-            link = tag['src']
-        else:
-            return False
-        if urlparse(link).hostname == urlparse(url).hostname:
-            return True
-        else:
-            if link.startswith('http'):
-                return False
-            else:
-                return True
+TAG_LINK = {'img': 'src', 'link': 'href', 'script': 'src'}
+
+
+def is_local(tag, url):
+    link = tag[TAG_LINK[tag.name]]
+
+    if urlparse(link).hostname == urlparse(url).hostname:
+        return True
     else:
-        return False
+        if link.startswith('http'):
+            return False
+        else:
+            return True
 
 
 def get_url(resource):
-    return resource['src'] if resource.has_attr('src') else resource['href']
+    return resource[TAG_LINK[resource.name]]
 
 
-def download(url, directory):
-    # Names
-    directory = os.path.abspath(directory)
-    html_file_name = re.sub(r'\W', '-',
-                            re.sub(r'(^https?://)|(/$)|\.html|\.htm', '', url)
-                            ) + '.html'
-    content_folder_name = html_file_name[:-5] + '_files'
-    html_file = os.path.join(directory, html_file_name)
-    content_folder = os.path.join(directory, content_folder_name)
-
-    # Getting web page
+def get_page(url):
+    # Get web page
     try:
         get = requests.get(url)
     except requests.exceptions.MissingSchema:
@@ -60,7 +46,36 @@ def download(url, directory):
         raise requests.exceptions.HTTPError(
             f'HTTP status code {get.status_code}'
         )
-    html_text = get.text
+    return get.text
+
+
+def parse_resources(bs4_soup):
+    logging.debug('Parsing resources.')
+    return bs4_soup(['img', 'link', 'script'])
+
+
+def download_resource(resource, content_folder, url, file_name):
+    # Download resource file to RAM
+    file_binary = requests.get(
+        urljoin(url, get_url(resource))).content
+
+    # Create resource file
+    with open(os.path.join(content_folder, file_name), 'xb') as f:
+        f.write(file_binary)
+    logging.debug('Local resource loaded.')
+
+
+def download(url, directory):
+    # Names
+    directory = os.path.abspath(directory)
+    html_file_name = re.sub(r'\W', '-',
+                            re.sub(r'(^https?://)|(/$)|\.html|\.htm', '', url)
+                            ) + '.html'
+    content_folder_name = html_file_name[:-5] + '_files'
+    html_file = os.path.join(directory, html_file_name)
+    content_folder = os.path.join(directory, content_folder_name)
+
+    html_text = get_page(url)
     parsed_html = BeautifulSoup(html_text, 'html.parser')
 
     # Create a folder here
@@ -72,23 +87,20 @@ def download(url, directory):
         raise PermissionError(f'Permission denied: {directory}')
     logging.debug('Content folder created.')
 
+    # Search for local resources
+    local_resources = [
+        x for x in parse_resources(parsed_html) if is_local(x, url)
+    ]
+
     # Create progress bar
     bar = IncrementalBar('Downloading:',
                          suffix='%(percent)d%% - %(eta)d seconds remaining',
-                         max=len(parsed_html.find_all(
-                             lambda x: is_local_resource(x, url)
-                         )))
+                         max=len(local_resources))
 
-    # Search for all tags and process
+    # Download local resources
     with bar:
-        for resource in parsed_html.find_all(
-                lambda x: is_local_resource(x, url)):
-
-            logging.debug('Found local resource.')
-
-            # Download resource file to RAM
-            file_binary = requests.get(
-                urljoin(url, get_url(resource))).content
+        for resource in local_resources:
+            logging.debug('Downloading local resource.')
 
             # Resource file name
             file_name, file_extension = os.path.splitext(get_url(resource))
@@ -102,16 +114,13 @@ def download(url, directory):
                                       )
                                ) + file_extension
 
-            # Edit link to resource file
-            if resource.has_attr('src'):
-                resource['src'] = os.path.join(content_folder_name, file_name)
-            else:
-                resource['href'] = os.path.join(content_folder_name, file_name)
+            # Download resource file
+            download_resource(resource, content_folder, url, file_name)
 
-            # Create resource file
-            with open(os.path.join(content_folder, file_name), 'xb') as f:
-                f.write(file_binary)
-            logging.debug('Local resource loaded.')
+            # Edit link to resource file
+            resource[TAG_LINK[resource.name]] = os.path.join(
+                content_folder_name, file_name)
+
             bar.next()
 
     # Create HTML file
