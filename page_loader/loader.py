@@ -65,7 +65,7 @@ def download_resource(resource, content_folder, url, file_name):
     logging.debug('Local resource loaded.')
 
 
-def download(url, directory):
+def download(url, directory):  # noqa: C901
     # Names
     directory = os.path.abspath(directory)
     html_file_name = re.sub(r'\W', '-',
