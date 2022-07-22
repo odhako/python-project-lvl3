@@ -29,8 +29,7 @@ def logging_init():
                         )
 
 
-def main():  # noqa: C901
-
+def main():
     logging_init()
     logging.debug('Script started.')
 

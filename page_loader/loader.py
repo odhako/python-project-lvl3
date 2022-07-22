@@ -108,7 +108,7 @@ def delete_empty_content_folder(content_folder):
         logging.debug('Content folder is empty. Deleting.')
 
 
-def download(url, directory):  # noqa: C901
+def download(url, directory):
     # Names
     directory = os.path.abspath(directory)
     html_file_name = re.sub(r'\W', '-',
