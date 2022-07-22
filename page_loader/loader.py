@@ -54,39 +54,7 @@ def parse_resources(bs4_soup):
     return bs4_soup(['img', 'link', 'script'])
 
 
-def download_resource(resource, content_folder, url, file_name):
-    # Download resource file to RAM
-    file_binary = requests.get(
-        urljoin(url, get_url(resource))).content
-
-    # Create resource file
-    with open(os.path.join(content_folder, file_name), 'xb') as f:
-        f.write(file_binary)
-    logging.debug('Local resource loaded.')
-
-
-def download(url, directory):  # noqa: C901
-    # Names
-    directory = os.path.abspath(directory)
-    html_file_name = re.sub(r'\W', '-',
-                            re.sub(r'(^https?://)|(/$)|\.html|\.htm', '', url)
-                            ) + '.html'
-    content_folder_name = html_file_name[:-5] + '_files'
-    html_file = os.path.join(directory, html_file_name)
-    content_folder = os.path.join(directory, content_folder_name)
-
-    html_text = get_page(url)
-    parsed_html = BeautifulSoup(html_text, 'html.parser')
-
-    # Create a folder here
-    try:
-        os.mkdir(content_folder)
-    except FileNotFoundError:
-        raise FileNotFoundError(f'Directory "{directory}" does not exist!')
-    except PermissionError:
-        raise PermissionError(f'Permission denied: {directory}')
-    logging.debug('Content folder created.')
-
+def download_resources(parsed_html, url, content_folder, content_folder_name):
     # Search for local resources
     local_resources = [
         x for x in parse_resources(parsed_html) if is_local(x, url)
@@ -114,23 +82,56 @@ def download(url, directory):  # noqa: C901
                                       )
                                ) + file_extension
 
-            # Download resource file
-            download_resource(resource, content_folder, url, file_name)
+            # Download resource file to RAM
+            file_binary = requests.get(
+                urljoin(url, get_url(resource))).content
+
+            # Create resource file
+            with open(os.path.join(content_folder, file_name), 'xb') as f:
+                f.write(file_binary)
+            logging.debug('Local resource loaded.')
 
             # Edit link to resource file
             resource[TAG_LINK[resource.name]] = os.path.join(
                 content_folder_name, file_name)
 
-            bar.next()
 
-    # Create HTML file
+def create_html_file(html_file, parsed_html):
     with open(html_file, mode='w') as h:
         h.write(parsed_html.prettify())
     logging.debug('HTML file created.')
 
-    # Delete folder if empty
+
+def delete_empty_content_folder(content_folder):
     if len(os.listdir(content_folder)) == 0:
         os.rmdir(content_folder)
         logging.debug('Content folder is empty. Deleting.')
+
+
+def download(url, directory):  # noqa: C901
+    # Names
+    directory = os.path.abspath(directory)
+    html_file_name = re.sub(r'\W', '-',
+                            re.sub(r'(^https?://)|(/$)|\.html|\.htm', '', url)
+                            ) + '.html'
+    content_folder_name = html_file_name[:-5] + '_files'
+    html_file = os.path.join(directory, html_file_name)
+    content_folder = os.path.join(directory, content_folder_name)
+
+    html_text = get_page(url)
+    parsed_html = BeautifulSoup(html_text, 'html.parser')
+
+    # Create a folder here
+    try:
+        os.mkdir(content_folder)
+    except FileNotFoundError:
+        raise FileNotFoundError(f'Directory "{directory}" does not exist!')
+    except PermissionError:
+        raise PermissionError(f'Permission denied: {directory}')
+    logging.debug('Content folder created.')
+
+    download_resources(parsed_html, url, content_folder, content_folder_name)
+    create_html_file(html_file, parsed_html)
+    delete_empty_content_folder(content_folder)
 
     return os.path.join(directory, html_file_name)
