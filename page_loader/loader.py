@@ -51,7 +51,7 @@ def get_page(url):
 
 def parse_resources(bs4_soup):
     logging.debug('Parsing resources.')
-    return bs4_soup(['img', 'link', 'script'])
+    return bs4_soup(TAG_LINK.keys())
 
 
 def download_resources(parsed_html, url, content_folder, content_folder_name):
