@@ -6,30 +6,32 @@ from page_loader.loader import download
 import logging
 
 
-file_handler = logging.FileHandler('page-loader.log')
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(logging.Formatter(
-    fmt='%(asctime)s %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d GMT%z %H:%M:%S'))
+def logging_init():
+    file_handler = logging.FileHandler('page-loader.log')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        fmt='%(asctime)s %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d GMT%z %H:%M:%S'))
 
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.INFO)
-stream_handler.setFormatter(logging.Formatter(
-    fmt='%(levelname)s: %(message)s'
-))
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    stream_handler.setFormatter(logging.Formatter(
+        fmt='%(levelname)s: %(message)s'
+    ))
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%Y-%m-%d GMT%z %H:%M:%S',
-                    handlers=[
-                        file_handler,
-                        stream_handler
-                    ]
-                    )
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(levelname)s: %(message)s',
+                        datefmt='%Y-%m-%d GMT%z %H:%M:%S',
+                        handlers=[
+                            file_handler,
+                            stream_handler
+                        ]
+                        )
 
 
 def main():  # noqa: C901
 
+    logging_init()
     logging.debug('Script started.')
 
     parser = argparse.ArgumentParser(
