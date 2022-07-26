@@ -10,6 +10,28 @@ from progress.bar import IncrementalBar
 TAG_LINK = {'img': 'src', 'link': 'href', 'script': 'src'}
 
 
+def name_for(path_type, url):
+    types = {'content_folder': '_files', 'html_file': '.html'}
+    name = re.sub(r'\W', '-',
+                  re.sub(r'(^https?://)|(/$)|\.html|\.htm', '',
+                         url)) + types[path_type]
+    return name
+
+
+def resource_file_name(base_url, local_resource_url):
+    file_name, extension = os.path.splitext(local_resource_url)
+    if not extension:
+        extension = '.html'
+    file_name = re.sub(r'[^A-Za-z\d_\-]',
+                       '-',
+                       re.sub(r'^https?://',
+                              '',
+                              urljoin(base_url, file_name)
+                              )
+                       ) + extension
+    return file_name
+
+
 def is_local(tag, url):
     link = tag[TAG_LINK[tag.name]]
 
@@ -20,10 +42,6 @@ def is_local(tag, url):
             return False
         else:
             return True
-
-
-def get_url(resource):
-    return resource[TAG_LINK[resource.name]]
 
 
 def get_page(url):
@@ -49,89 +67,87 @@ def get_page(url):
     return get.text
 
 
-def parse_resources(bs4_soup):
-    logging.debug('Parsing resources.')
-    return bs4_soup(TAG_LINK.keys())
+def parse(html_text, url):
+    logging.debug('Parsing html.')
+
+    parsed_html = BeautifulSoup(html_text, 'html.parser')
+    local_resources = []
+
+    for resource in parsed_html.find_all(TAG_LINK.keys()):
+        if is_local(resource, url):
+            # Resource file local path
+            local_file_path = os.path.join(
+                name_for('content_folder', url),
+                resource_file_name(url, resource[TAG_LINK[resource.name]])
+            )
+
+            # Add url to list for downloading
+            local_resources.append({
+                'file_path': local_file_path,
+                'link': urljoin(url, resource[TAG_LINK[resource.name]])
+            })
+
+            # Change link to resource in parsed html
+            resource[TAG_LINK[resource.name]] = local_file_path
+
+    logging.debug(f'Found {len(local_resources)} local resources.')
+
+    # New pretty HTML text
+    output_html_text = parsed_html.prettify()
+
+    return output_html_text, local_resources
 
 
-def download_resources(parsed_html, url, content_folder, content_folder_name):
-    # Search for local resources
-    local_resources = [
-        x for x in parse_resources(parsed_html) if is_local(x, url)
-    ]
-
+def download_resources(resources, directory):
     # Create progress bar
     bar = IncrementalBar('Downloading:',
                          suffix='%(percent)d%% - %(eta)d seconds remaining',
-                         max=len(local_resources))
+                         max=len(resources))
 
-    # Download local resources
     with bar:
-        for resource in local_resources:
+        for resource in resources:
             logging.debug('Downloading local resource.')
 
-            # Resource file name
-            file_name, file_extension = os.path.splitext(get_url(resource))
-            if not file_extension:
-                file_extension = '.html'
-            file_name = re.sub(r'[^A-Za-z\d_\-]',
-                               '-',
-                               re.sub(r'^https?://',
-                                      '',
-                                      urljoin(url, file_name)
-                                      )
-                               ) + file_extension
-
             # Download resource file to RAM
-            file_binary = requests.get(
-                urljoin(url, get_url(resource))).content
+            file_binary = requests.get(resource['link']).content
 
             # Create resource file
-            with open(os.path.join(content_folder, file_name), 'xb') as f:
+            with open(
+                    os.path.join(
+                        directory,
+                        resource['file_path']),
+                    'xb') as f:
                 f.write(file_binary)
             logging.debug('Local resource loaded.')
 
-            # Edit link to resource file
-            resource[TAG_LINK[resource.name]] = os.path.join(
-                content_folder_name, file_name)
+            bar.next()
 
 
-def create_html_file(html_file, parsed_html):
+def create_html_file(html_file, html_text):
     with open(html_file, mode='w') as h:
-        h.write(parsed_html.prettify())
+        h.write(html_text)
     logging.debug('HTML file created.')
 
 
-def delete_empty_content_folder(content_folder):
-    if len(os.listdir(content_folder)) == 0:
-        os.rmdir(content_folder)
-        logging.debug('Content folder is empty. Deleting.')
-
-
 def download(url, directory):
-    # Names
     directory = os.path.abspath(directory)
-    html_file_name = re.sub(r'\W', '-',
-                            re.sub(r'(^https?://)|(/$)|\.html|\.htm', '', url)
-                            ) + '.html'
-    content_folder_name = html_file_name[:-5] + '_files'
-    html_file = os.path.join(directory, html_file_name)
-    content_folder = os.path.join(directory, content_folder_name)
-
     html_text = get_page(url)
-    parsed_html = BeautifulSoup(html_text, 'html.parser')
 
-    # Create a folder here
-    try:
-        os.mkdir(content_folder)
-    except FileNotFoundError:
-        raise FileNotFoundError(f'Directory "{directory}" does not exist!')
-    except PermissionError:
-        raise PermissionError(f'Permission denied: {directory}')
-    logging.debug('Content folder created.')
+    output_html_text, local_resources = parse(html_text, url)
 
-    download_resources(parsed_html, url, content_folder, content_folder_name)
-    create_html_file(html_file, parsed_html)
-    delete_empty_content_folder(content_folder)
+    if local_resources:
+        # Create a folder here
+        try:
+            os.mkdir(os.path.join(
+                directory, name_for('content_folder', url)))
+        except FileNotFoundError:
+            raise FileNotFoundError(f'Directory "{directory}" does not exist!')
+        except PermissionError:
+            raise PermissionError(f'Permission denied: {directory}')
+        logging.debug('Content folder created.')
 
-    return os.path.join(directory, html_file_name)
+    download_resources(local_resources, directory)
+    create_html_file(os.path.join(directory, name_for('html_file', url)),
+                     output_html_text)
+
+    return os.path.join(directory, name_for('html_file', url))
