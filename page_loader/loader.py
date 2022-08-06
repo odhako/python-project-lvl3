@@ -1,16 +1,10 @@
-import logging
 import os
 
+from page_loader.filesystem_io import create_html_file, create_resource_folder
 from page_loader.http_requests import get_page
 from page_loader.naming import make_name_from_url
 from page_loader.parser import parse
 from page_loader.resource_loader import download_resources
-
-
-def create_html_file(html_file, html_text):
-    with open(html_file, mode='w') as h:
-        h.write(html_text)
-    logging.debug('HTML file created.')
 
 
 def download(url, directory):
@@ -20,15 +14,7 @@ def download(url, directory):
     output_html_text, local_resources = parse(html_text, url)
 
     if local_resources:
-        # Create a folder here
-        try:
-            os.mkdir(os.path.join(
-                directory, make_name_from_url('content_folder', url)))
-        except FileNotFoundError:
-            raise FileNotFoundError(f'Directory "{directory}" does not exist!')
-        except PermissionError:
-            raise PermissionError(f'Permission denied: {directory}')
-        logging.debug('Content folder created.')
+        create_resource_folder(url, directory)
 
     download_resources(local_resources, directory)
 

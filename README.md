@@ -5,6 +5,18 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/13b6eafbe3927c51e0cf/test_coverage)](https://codeclimate.com/github/odhako/python-project-lvl3/test_coverage)
 
 This is **page-loader**. Program can download a web page to disc.
+
+### Usage:
+`page-loader [-h] [--output OUTPUT] url`
+
+Required positional argument:
+- `url` Url address with scheme, like `http://`
+
+Options:
+- `-h, --help` show help message and exit
+- `--output DIRECTORY, -o DIRECTORY` Output directory, must be created before. Default is working directory.
+
+
 ### Demo
 #### Step 1:
 - `page-loader url` - default path - [asciinema](https://asciinema.org/a/505089)
@@ -26,4 +38,3 @@ This is **page-loader**. Program can download a web page to disc.
 #### Step 6:
 - Progress bar demo - [asciinema](https://asciinema.org/a/507684)
 
-`test`

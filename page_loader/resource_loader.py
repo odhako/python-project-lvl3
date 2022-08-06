@@ -1,7 +1,7 @@
 import logging
-import os
 from progress.bar import IncrementalBar
 
+from page_loader.filesystem_io import create_resource_file
 from page_loader.http_requests import get_resource
 
 
@@ -19,12 +19,7 @@ def download_resources(resources, directory):
             file_binary = get_resource(resource['link'])
 
             # Create resource file
-            with open(
-                    os.path.join(
-                        directory,
-                        resource['file_path']),
-                    'xb') as f:
-                f.write(file_binary)
+            create_resource_file(file_binary, directory, resource['file_path'])
             logging.debug('Local resource loaded.')
 
             bar.next()
